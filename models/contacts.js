@@ -74,9 +74,7 @@ async function addContact(name, email, phone) {
   }
 }
 
-// addContact("Adriana", "john@example.com", "123-456-7890");
-// getContactById("b728706e-a552-42db-ab92-8a1c1275fca4");
-//  removeContact("fd1d9747-a27a-4c8f-9e11-da0bd5532110");
+
 
 const updateContact = async (contactId, body) => {
   try {
@@ -91,10 +89,10 @@ const updateContact = async (contactId, body) => {
       return false;
     }
 
-    // Actualizează contactul cu datele noi din body
+   
     contacts[indexContact] = { ...contacts[indexContact], ...body };
 
-    // Scrie lista actualizată în fișier
+  
     await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
     console.log(`Contact with ID ${contactId} was successfully updated.`);
     return contacts[indexContact];
