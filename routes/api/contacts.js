@@ -28,7 +28,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get("/:contactId", async (req, res) => {
+router.get("/:id", async (req, res) => {
   const { id } = req.params; 
 
   try {
@@ -91,7 +91,7 @@ const updateSchema = Joi.object({
   phone: Joi.string().pattern(/^[0-9-]+$/),
 }).or("name", "email", "phone"); 
 
-router.put("/contacts/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const body = req.body;
 
