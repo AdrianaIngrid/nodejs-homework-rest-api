@@ -7,7 +7,7 @@ const createUserController = async (req, res, next) => {
   try {
     const { email, password } = req.body;
       const result = await services.createUser({ email, password });
-      const payload = { email: result.email };
+      const payload = { id: result._id, email: result.email };
       const token = jwt.sign(payload, secret, { expiresIn: "1h" });
       console.log("JWT Secret:", secret);
       console.log("Generated Token:", token);
@@ -54,7 +54,38 @@ const loginController = async (req, res, next) => {
         next(error);
     }
 };
+
+
+const logoutController = async (req, res, next) => {
+  try {
+    const userId = req.user._id; 
+
+        const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    user.token = null;
+      await user.save();
+      
+    res.status(204).send(); 
+  } catch (error) {
+    next(error);
+  }
+};
+const currentUserController = (req, res) => {
+  const { email, subscription } = req.user; 
+
+  res.status(200).json({
+    email,
+    subscription,
+  });
+};
+
+
 module.exports = {
   createUserController,
   loginController,
+  logoutController,
+  currentUserController,
 };

@@ -7,12 +7,15 @@ const userRouter = require("./routes/authRoutes");
 const coreOptions = require("./cors");
 
 const app = express();
+require("./middlewares/passportConfig");
+const passport = require("passport");
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(logger(formatsLogger));
 app.use(cors(coreOptions));
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", userRouter);
