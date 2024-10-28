@@ -41,8 +41,24 @@ const createUser = async ({ email, password }) => {
     password: hashedPassword,
     subscription: "starter",
   });
+
    return await newUser.save();
 
+};
+const checkUserDB = async ({ email, password }) => {
+  try {
+    console.log(`Parola:${password}`);
+    const user = await User.findOne({ email });
+
+    if (!user || !user.validPassword(password)) {
+      throw new Error("Email sau parola gresita!");
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Eroare la verificarea utilizatorului:", error.message);
+    throw error;
+  }
 };
 
 
@@ -55,4 +71,5 @@ module.exports = {
   favoriteContact,
   createUser,
   getAllUsers,
+  checkUserDB,
 };

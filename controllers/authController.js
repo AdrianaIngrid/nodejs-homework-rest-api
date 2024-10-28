@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secret = process.env.SECRET;
 const User = require('../services/schemas/userSchema');
+const { checkUserDB } = require('../services/index');
 const createUserController = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -23,36 +24,32 @@ const createUserController = async (req, res, next) => {
   }
 };
 
-const loginController = async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-           return res
-             .status(401)
-             .json({ message: "Email or password is wrong" });
-        }
-        const isPasswordValid = await user.isPasswordValid(password);
-        if (!isPasswordValid) {
-            return res
-              .status(401)
-              .json({ message: "Email or password is wrong" });
-        }
+const loginUserController = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const result = await checkUserDB({
+      email,
+      password,
+    });
 
-        const payload = { email: user.email, id: user._id };
-        const token = jwt.sign(payload, secret, { expiresIn: "1h" });
-        user.token = token;
-        await user.save();
-        res.status(200).json({
-            token, user: {
-                email: user.email,
-                subscription: user.subscription,
-            },
-        });
-        
-    } catch (error) {
-        next(error);
-    }
+    const payload = { email: result.email };
+
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+
+    res.status(201).json({
+      status: "succes",
+      code: 201,
+      data: {
+        email: result.email,
+        token,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: 404,
+      error: error.message,
+    });
+  }
 };
 
 
@@ -85,7 +82,7 @@ const currentUserController = (req, res) => {
 
 module.exports = {
   createUserController,
-  loginController,
+  loginUserController,
   logoutController,
   currentUserController,
 };
