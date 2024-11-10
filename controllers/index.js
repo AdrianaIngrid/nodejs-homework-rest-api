@@ -112,6 +112,7 @@ const updateStatusContact = async (req, res, next) => {
   }
 };
 
+
 module.exports = {
   getAllContacts,
   createContact,
@@ -119,4 +120,5 @@ module.exports = {
   updateExistingContact,
   getContactById,
   updateStatusContact,
+  
 };

@@ -8,6 +8,8 @@ require("dotenv").config();
 const secret = process.env.SECRET;
 const User = require("../services/schemas/userSchema");
 const { checkUserDB } = require("../services/index");
+const uuidv4 = require("uuid");
+const emailSchema = require("../services/schemas/emailSchema");
 const createUserController = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -102,6 +104,58 @@ const uploadAvatarController = async (req, res, next) => {
     next(error);
   }
 };
+const verifyEmailController = async function (req, res, next) {
+  console.log("Ruta de verificare a fost apelată.");
+  const { verificationToken } = req.params;
+  try {
+    console.log(verificationToken);
+    await services.verifyEmail(verificationToken);
+
+    res.status(200).json({ message: "Verification successful", status: 200 });
+  } catch (error) {
+    res.status(404).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+const verificationEmailUserController = async (req, res) => {
+  // Validare body
+  const { error } = emailSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: "missing required field email" });
+  }
+
+  const { email } = req.body;
+
+  try {
+    // Caută utilizatorul
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verifică dacă utilizatorul este deja verificat
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Verification has already been passed" });
+    }
+
+    // Generează un token nou dacă nu există unul sau trimite tokenul existent
+    const verificationToken = user.verificationToken || uuidv4();
+    if (!user.verificationToken) {
+      user.verificationToken = verificationToken;
+      await user.save();
+    }
+
+    // Trimite emailul de verificare
+    await services.sendVerificationEmail(email, verificationToken);
+    res.status(200).json({ message: "Verification email sent" });
+  } catch (error) {
+    console.error("Eroare la retrimiterea emailului:", error.message);
+    res.status(500).json({ message: "Eroare la trimiterea emailului de verificare." });
+  }
+};
 
 module.exports = {
   createUserController,
@@ -109,4 +163,6 @@ module.exports = {
   logoutController,
   currentUserController,
   uploadAvatarController,
+  verifyEmailController,
+  verificationEmailUserController,
 };

@@ -10,6 +10,8 @@ const {
   logoutController,
   currentUserController,
   uploadAvatarController,
+  verifyEmailController,
+  verificationEmailUserController,
 } = require("../controllers/authController");
 const validateSignUp = require("../middlewares/validateSignUp");
 const loginValidate = require("../middlewares/validateLogin");
@@ -31,4 +33,7 @@ router.post("/login", loginValidate, loginUserController);
 router.get("/logout", auth, logoutController);
 router.get("/current", auth, currentUserController);
 router.patch("/avatars", auth, upload.single("avatar"), uploadAvatarController);
+router.get("/verify/:verificationToken", verifyEmailController);
+router.post("/verify", verificationEmailUserController);
+
 module.exports = router;
